@@ -1,10 +1,15 @@
 "use client"
-
 import React, { useRef, useState } from 'react';
-import { createWorker } from 'tesseract.js';
+import * as mobilenet from '@tensorflow-models/mobilenet';
+import '@tensorflow/tfjs';
 
-const ImageRecognizer = () => {
-  const [text, setText] = useState<string>('');
+interface Prediction {
+  className: string;
+  probability: number;
+}
+
+const ImageRecognizer: React.FC = () => {
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const imageRef = useRef<HTMLImageElement>(null);
 
@@ -14,23 +19,14 @@ const ImageRecognizer = () => {
 
     const reader = new FileReader();
 
-    reader.onload = async (e) => {
+    reader.onload = async (e: ProgressEvent<FileReader>) => {
       if (imageRef.current && e.target?.result) {
         imageRef.current.src = e.target.result as string;
         setLoading(true);
-        
-        const worker = await createWorker();
-        
-        try {
-          await worker.load();
-          const { data: { text } } = await worker.recognize(imageRef.current);
-          setText(text);
-        } catch (error) {
-          console.error("Erreur lors de la reconnaissance:", error);
-        } finally {
-          await worker.terminate();
-          setLoading(false);
-        }
+        const model = await mobilenet.load();
+        const results = await model.classify(imageRef.current);
+        setPredictions(results);
+        setLoading(false);
       }
     };
 
@@ -38,67 +34,64 @@ const ImageRecognizer = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden p-6">
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-800">OCR Simple</h1>
-          <p className="text-gray-600 mt-1">Extrayez le texte de vos images</p>
-        </div>
-
-        <div className="space-y-4">
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors cursor-pointer">
-            <label className="flex flex-col items-center">
-              <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span className="block text-sm font-medium text-gray-700">
-                {loading ? 'Traitement en cours...' : 'Cliquez pour uploader une image'}
-              </span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-                disabled={loading}
+        <h1 className="text-2xl font-bold text-gray-800 mb-6 text-center">Image Recognition</h1>
+        
+        <div className="mb-6">
+          <label className="block mb-2 text-sm font-medium text-gray-700">
+            Upload an image
+          </label>
+          <div className="flex items-center justify-center w-full">
+            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition">
+              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                <svg className="w-8 h-8 mb-4 text-gray-500" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                  <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2"/>
+                </svg>
+                <p className="mb-2 text-sm text-gray-500">
+                  <span className="font-semibold">Click to upload</span> or drag and drop
+                </p>
+                <p className="text-xs text-gray-500">PNG, JPG, JPEG (MAX. 5MB)</p>
+              </div>
+              <input 
+                type="file" 
+                accept="image/*" 
+                onChange={handleImageUpload} 
+                className="hidden" 
               />
             </label>
           </div>
-
-          {imageRef.current?.src && (
-            <div className="relative">
-              <img
-                ref={imageRef}
-                alt="Aperçu"
-                className="rounded-lg shadow-sm w-full"
-              />
-              {loading && (
-                <div className="absolute inset-0 bg-black bg-opacity-30 flex items-center justify-center rounded-lg">
-                  <div className="bg-white px-4 py-2 rounded-full shadow-md flex items-center">
-                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mr-2"></div>
-                    <span className="text-sm font-medium">Analyse en cours</span>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {text && (
-            <div className="mt-4 bg-gray-50 p-4 rounded-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="font-medium text-gray-800">Texte extrait</h2>
-                <button 
-                  onClick={() => navigator.clipboard.writeText(text)}
-                  className="text-sm text-blue-600 hover:text-blue-800"
-                >
-                  Copier
-                </button>
-              </div>
-              <div className="bg-white p-3 rounded border border-gray-300">
-                <pre className="whitespace-pre-wrap text-sm">{text}</pre>
-              </div>
-            </div>
-          )}
         </div>
+
+        <div className="mb-6 flex justify-center">
+          <img
+            ref={imageRef}
+            alt="Uploaded Preview"
+            className="max-h-64 rounded-lg object-contain border border-gray-200"
+            style={{ display: predictions.length ? 'block' : 'none' }}
+          />
+        </div>
+
+        {loading && (
+          <div className="flex justify-center items-center py-8">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            <span className="ml-3 text-gray-600">Analyzing image...</span>
+          </div>
+        )}
+
+        {predictions.length > 0 && (
+          <div className="bg-gray-50 rounded-lg p-4">
+            <h2 className="text-lg font-semibold text-gray-800 mb-3">Predictions</h2>
+            <ul className="space-y-2">
+              {predictions.map((pred, index) => (
+                <li key={index} className="flex justify-between items-center bg-white px-4 py-2 rounded shadow-sm">
+                  <span className="text-gray-700 capitalize">{pred.className.toLowerCase()}</span>
+                  <span className="font-medium text-blue-600">{(pred.probability * 100).toFixed(2)}%</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
