@@ -36,6 +36,28 @@ model Course {
   updatedAt   DateTime  @updatedAt
   lessons     Lesson[]
   enrollments CourseEnrollment[]
+  documents   Document[]
+}
+
+// Add new models for document handling
+model Document {
+  id          String    @id @default(cuid())
+  title       String
+  fileUrl     String
+  fileType    FileType
+  content     String?   // Extracted text content
+  analysis    Json?     // AI analysis results
+  courseId    String
+  course      Course    @relation(fields: [courseId], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Add new enum for file types
+enum FileType {
+  PDF
+  IMAGE
+  TEXT
 }
 
 model Lesson {
