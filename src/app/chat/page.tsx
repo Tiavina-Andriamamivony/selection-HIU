@@ -10,7 +10,7 @@ export default function ChatSection() {
           <h1 className="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/60">
             Everything is possible with
           </h1>
-          
+          <br /><br />
           <HyperText className="text-5xl md:text-6xl font-bold">Toky</HyperText>
         </div>
 
