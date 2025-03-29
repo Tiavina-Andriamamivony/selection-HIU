@@ -44,7 +44,7 @@ const Navbar = () => {
   }, [isSignedIn, user]);
 
   return (
-    <div className="border-b">
+    <div className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center px-4">
         <Link href="/" className="text-xl font-bold text-primary">
           SkillAI
@@ -95,7 +95,7 @@ const Navbar = () => {
                     <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px]">
                       <li>
                         <NavigationMenuLink asChild>
-                          <Link href="/linkedin/analyze" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <Link href="/analyze" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                             <div className="text-sm font-medium">Analyser ma photo</div>
                             <p className="text-sm leading-snug text-muted-foreground">
                               Obtenez un retour détaillé sur votre photo de profil
