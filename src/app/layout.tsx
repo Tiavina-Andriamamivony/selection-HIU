@@ -26,7 +26,10 @@ const quicksand = Quicksand({
   variable: '--font-quicksand'
 });
 
-import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeProvider } from "@/components/theme-provider"
+import  Navbar  from "@/components/ui/navbar"
+import { Toaster } from 'sonner';
+
 export default function RootLayout({
   children,
 }: {
@@ -42,7 +45,11 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <Navbar />
+            <main>
+              {children}
+            </main>
+            <Toaster />
           </ThemeProvider>
         </body>
       </html>

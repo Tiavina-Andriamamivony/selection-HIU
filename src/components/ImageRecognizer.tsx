@@ -2,6 +2,9 @@
 import React, { useRef, useState } from 'react';
 import * as mobilenet from '@tensorflow-models/mobilenet';
 import '@tensorflow/tfjs';
+import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
+import { saveImageAnalysis } from '@/app/actions/saveImageAnalysis';
 
 interface Prediction {
   className: string;
@@ -9,6 +12,8 @@ interface Prediction {
 }
 
 const ImageRecognizer: React.FC = () => {
+  const { user } = useUser();
+  const [imageUrl, setImageUrl] = useState<string>('');
   const [predictions, setPredictions] = useState<Prediction[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -21,12 +26,36 @@ const ImageRecognizer: React.FC = () => {
 
     reader.onload = async (e: ProgressEvent<FileReader>) => {
       if (imageRef.current && e.target?.result) {
-        imageRef.current.src = e.target.result as string;
+        const imageUrl = e.target.result as string;
+        imageRef.current.src = imageUrl;
+        setImageUrl(imageUrl);
         setLoading(true);
-        const model = await mobilenet.load();
-        const results = await model.classify(imageRef.current);
-        setPredictions(results);
-        setLoading(false);
+        
+        try {
+          const model = await mobilenet.load();
+          const results = await model.classify(imageRef.current);
+          setPredictions(results);
+
+          // Save analysis if user is logged in
+          if (user) {
+            const saveResult = await saveImageAnalysis(
+              user.id,
+              imageUrl,
+              results
+            );
+            
+            if (saveResult.success) {
+              toast.success('Analysis saved successfully!');
+            } else {
+              toast.error('Failed to save analysis');
+            }
+          }
+        } catch (error) {
+          toast.error('Error analyzing image');
+          console.error(error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
 

@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import { useEffect } from "react"
 import { UserButton, SignInButton, useUser } from "@clerk/nextjs"
 import {
   NavigationMenu,
@@ -15,7 +16,32 @@ import Link from "next/link"
 import { Button } from "./button"
 
 const Navbar = () => {
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
+
+  useEffect(() => {
+    const syncUser = async () => {
+      if (user) {
+        try {
+          await fetch('/api/user/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: user.id,
+              firstName: user.firstName || "",
+              lastName: user.lastName || "",
+              profileImage: user.imageUrl,
+            }),
+          });
+        } catch (error) {
+          console.error('Error syncing user:', error);
+        }
+      }
+    };
+
+    if (isSignedIn) {
+      syncUser();
+    }
+  }, [isSignedIn, user]);
 
   return (
     <div className="border-b">
@@ -51,7 +77,7 @@ const Navbar = () => {
                       </li>
                       <li>
                         <NavigationMenuLink asChild>
-                          <Link href="/training/chat" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <Link href="/chat" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                             <div className="text-sm font-medium">Chat Formation</div>
                             <p className="text-sm leading-snug text-muted-foreground">
                               Discutez avec votre formateur IA

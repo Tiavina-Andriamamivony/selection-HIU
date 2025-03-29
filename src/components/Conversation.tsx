@@ -1,17 +1,30 @@
 'use client';
 
 import { useConversation } from '@11labs/react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
+import { useUser } from "@clerk/nextjs";
+import { Save } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Mic, MicOff } from "lucide-react";
+import { saveConversation } from "@/app/actions/saveConversation";
 
 export function Conversation() {
+  const { user } = useUser();
+  const [title, setTitle] = useState('');
+  const [conversationText, setConversationText] = useState('');
   const conversation = useConversation({
-    onConnect: () => console.log('Connected'),
+    onConnect: () => {
+      console.log('Connected');
+      setConversationText('AI: Hello! How can I help you today?\n');
+    },
     onDisconnect: () => console.log('Disconnected'),
-    onMessage: (message) => console.log('Message:', message),
+    onMessage: (message) => {
+      console.log('Message:', message);
+      setConversationText(prev => `${prev}AI: ${message.message}\n`);
+    },
     onError: (error) => console.error('Error:', error),
   });
 
@@ -30,12 +43,52 @@ export function Conversation() {
     await conversation.endSession();
   }, [conversation]);
 
+  const handleSaveConversation = async () => {
+    if (!user || !conversationText.trim()) {
+      toast.error('Please ensure there is conversation content');
+      return;
+    }
+
+    try {
+      // Stop the conversation first
+      await conversation.endSession();
+
+      const result = await saveConversation(
+        title || 'Conversation ' + new Date().toLocaleString(),
+        conversationText,
+        user.id
+      );
+
+      if (result.success) {
+        toast.success('Conversation saved successfully!');
+        setTitle('');
+        setConversationText('');
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      toast.error('Failed to save conversation');
+      console.error(error);
+    }
+  };
+
   return (
     <Card className="w-full max-w-md mx-auto bg-white/10 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle className="text-center flex items-center justify-center gap-2">
-          <Mic className="w-5 h-5" />
-          AI Conversation
+        <CardTitle className="text-center flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Mic className="w-5 h-5" />
+            AI Conversation
+          </div>
+          <Button
+            onClick={handleSaveConversation}
+            variant="outline"
+            size="sm"
+            disabled={!conversationText.trim()}
+          >
+            <Save className="w-4 h-4 mr-2" />
+            Save
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
