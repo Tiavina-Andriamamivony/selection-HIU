@@ -1,6 +1,5 @@
 import { Conversation } from "@/components/Conversation";
 import { HyperText } from "@/components/magicui/hyper-text";
-import ImageRecognizer from "@/components/ImageRecognizer";
 
 export default function ChatSection() {
   return (
@@ -16,7 +15,6 @@ export default function ChatSection() {
 
         <div className="grid gap-8 max-w-4xl mx-auto">
           <Conversation />
-          <ImageRecognizer />
         </div>
       </div>
     </div>
