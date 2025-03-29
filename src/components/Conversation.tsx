@@ -32,7 +32,7 @@ export function Conversation() {
     try {
       await navigator.mediaDevices.getUserMedia({ audio: true });
       await conversation.startSession({
-        agentId: 'MhWI9q4y4mCk1OtfXm2e',
+        agentId: 'PNJLCTwGhmk97pkN4Blk',
       });
     } catch (error) {
       console.error('Failed to start conversation:', error);

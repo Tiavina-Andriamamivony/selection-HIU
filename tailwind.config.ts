@@ -95,12 +95,53 @@ export default {
   				'50%': {
   					transform: 'translate(-50%, -50%) scale(0.9)'
   				}
+  			},
+  			aurora: {
+  				'0%': {
+  					backgroundPosition: '0% 50%',
+  					transform: 'rotate(-5deg) scale(0.9)'
+  				},
+  				'25%': {
+  					backgroundPosition: '50% 100%',
+  					transform: 'rotate(5deg) scale(1.1)'
+  				},
+  				'50%': {
+  					backgroundPosition: '100% 50%',
+  					transform: 'rotate(-3deg) scale(0.95)'
+  				},
+  				'75%': {
+  					backgroundPosition: '50% 0%',
+  					transform: 'rotate(3deg) scale(1.05)'
+  				},
+  				'100%': {
+  					backgroundPosition: '0% 50%',
+  					transform: 'rotate(-5deg) scale(0.9)'
+  				}
+  			},
+  			marquee: {
+  				from: {
+  					transform: 'translateX(0)'
+  				},
+  				to: {
+  					transform: 'translateX(calc(-100% - var(--gap)))'
+  				}
+  			},
+  			'marquee-vertical': {
+  				from: {
+  					transform: 'translateY(0)'
+  				},
+  				to: {
+  					transform: 'translateY(calc(-100% - var(--gap)))'
+  				}
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
-  			ripple: 'ripple var(--duration,2s) ease calc(var(--i, 0)*.2s) infinite'
+  			ripple: 'ripple var(--duration,2s) ease calc(var(--i, 0)*.2s) infinite',
+  			aurora: 'aurora 8s ease-in-out infinite alternate',
+  			marquee: 'marquee var(--duration) infinite linear',
+  			'marquee-vertical': 'marquee-vertical var(--duration) linear infinite'
   		}
   	}
   },

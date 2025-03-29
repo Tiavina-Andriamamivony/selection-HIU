@@ -105,7 +105,7 @@ const Navbar = () => {
                       </li>
                       <li>
                         <NavigationMenuLink asChild>
-                          <Link href="/linkedin/history" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                          <Link href="/history" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
                             <div className="text-sm font-medium">Historique</div>
                             <p className="text-sm leading-snug text-muted-foreground">
                               Consultez vos analyses précédentes
